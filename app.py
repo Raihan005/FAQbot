@@ -29,7 +29,9 @@ def initialize_session_state():
             openai_api_key=os.getenv('OPENAI_API_KEY'),
             temperature=0.7
         )
-        prompt = PromptTemplate(template=template)
+        prompt = PromptTemplate(
+            input_variables=["history", "input"],  
+            template=template)
         
         memory = ConversationBufferMemory()
         st.session_state.chain = ConversationChain(
@@ -66,13 +68,16 @@ def main():
 
         st.session_state.messages.append({"role": "user", "content": prompt})
         
- 
         with st.chat_message("user"):
             st.markdown(prompt)
         with st.chat_message("assistant"):
             with st.spinner("..."):
                 response = st.session_state.chain.predict(input=prompt)
                 st.markdown(response)
+        
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        
+        st.rerun()
                 
 
         st.session_state.messages.append({"role": "assistant", "content": response})
